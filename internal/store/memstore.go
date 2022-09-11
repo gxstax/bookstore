@@ -1,29 +1,29 @@
 package store
 
 import (
-	mystore "bookstore/store"
+	myStore "bookstore/store"
 	factory "bookstore/store/factory"
 	"sync"
 )
 
 func init() {
 	factory.Register("mem", &MemStore{
-		books: make(map[string]*mystore.Book),
+		books: make(map[string] *myStore.Book),
 	})
 }
 
 type MemStore struct {
 	sync.RWMutex
-	books map[string]*mystore.Book
+	books map[string] *myStore.Book
 }
 
 // Create creates a new Book in the store.
-func (ms *MemStore) Create(book *mystore.Book) error {
+func (ms *MemStore) Create(book *myStore.Book) error {
 	ms.Lock()
 	defer ms.Unlock()
 
 	if _, ok := ms.books[book.Id]; ok {
-		return mystore.ErrExist
+		return myStore.ErrExist
 	}
 
 	nBook := *book
@@ -33,13 +33,13 @@ func (ms *MemStore) Create(book *mystore.Book) error {
 }
 
 // Update updates the existed Book in the store.
-func (ms *MemStore) Update(book *mystore.Book) error {
+func (ms *MemStore) Update(book *myStore.Book) error {
 	ms.Lock()
 	defer ms.Unlock()
 
 	oldBook, ok := ms.books[book.Id]
 	if !ok {
-		return mystore.ErrNotFound
+		return myStore.ErrNotFound
 	}
 
 	nBook := *oldBook
@@ -62,7 +62,7 @@ func (ms *MemStore) Update(book *mystore.Book) error {
 
 // Get retrieves a book from the store, by id. If no such id exists. an
 // error is returned.
-func (ms *MemStore) Get(id string) (mystore.Book, error) {
+func (ms *MemStore) Get(id string) (myStore.Book, error) {
 	ms.RLock()
 	defer ms.RUnlock()
 
@@ -70,7 +70,7 @@ func (ms *MemStore) Get(id string) (mystore.Book, error) {
 	if ok {
 		return *t, nil
 	}
-	return mystore.Book{}, mystore.ErrNotFound
+	return myStore.Book{}, myStore.ErrNotFound
 }
 
 // Delete deletes the book with the given id. If no such id exist. an error
@@ -80,7 +80,7 @@ func (ms *MemStore) Delete(id string) error {
 	defer ms.Unlock()
 
 	if _, ok := ms.books[id]; !ok {
-		return mystore.ErrNotFound
+		return myStore.ErrNotFound
 	}
 
 	delete(ms.books, id)
@@ -88,11 +88,11 @@ func (ms *MemStore) Delete(id string) error {
 }
 
 // GetAll returns all the books in the store, in arbitrary order.
-func (ms *MemStore) GetAll() ([]mystore.Book, error) {
+func (ms *MemStore) GetAll() ([]myStore.Book, error) {
 	ms.RLock()
 	defer ms.RUnlock()
 
-	allBooks := make([]mystore.Book, 0, len(ms.books))
+	allBooks := make([]myStore.Book, 0, len(ms.books))
 	for _, book := range ms.books {
 		allBooks = append(allBooks, *book)
 	}
